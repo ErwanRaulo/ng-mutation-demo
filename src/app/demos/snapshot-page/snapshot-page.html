@@ -1,0 +1,56 @@
+<p class="pitch">
+  <code>snapshot()</code> bundles <code>status()</code> <code>value()</code> <code>error()</code> signals
+  into one discriminated union on 'status()'. Compare with
+  <a routerLink="/has-value">the hasValue() page</a>, which narrows the same way but only for the
+  success case.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section>
+  <h2>&#64;switch (snap.status)</h2>
+  @let snap = createUser.snapshot();
+  @switch (snap.status) {
+    @case ('idle') {
+      <p class="hint">Idle, nothing created yet.</p>
+    }
+    @case ('pending') {
+      <p class="hint">
+        Pending: <code>snap.value</code> is
+        {{ snap.value ? snap.value.name : 'still undefined (nothing created yet)' }}.
+      </p>
+    }
+    @case ('success') {
+      <div class="card">
+        <strong>{{ snap.value.name }}</strong>
+        <span>#{{ snap.value.id }}</span>
+      </div>
+    }
+    @case ('error') {
+      <p class="hint">
+        Error: {{ snap.error }} : <code>snap.value</code> still holds
+        {{ snap.value ? snap.value.name : 'no user yet' }}, mutation() never clears it on
+        failure.
+      </p>
+    }
+  }
+  <p class="hint">
+    Submit an empty name to trigger an error, then create a real user and submit an empty name
+    again: <code>snap.value</code> keeps the last successfully created user across the
+    <code>'error'</code> branch.
+  </p>
+</section>

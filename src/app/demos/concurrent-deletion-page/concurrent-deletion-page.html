@@ -1,0 +1,55 @@
+<p class="pitch">
+  Calling <code>mutate()</code> again while a <code>deleteUser</code> call is still in flight does
+  <strong>not</strong> abort it: both calls run to completion independently, but only the latest
+  call's outcome reaches <code>status</code>/<code>error</code>, and only the latest call's
+  <code>onSuccess</code>/<code>onError</code> fires.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    "Grace Hopper" always fails to delete (deterministic error demo). Click delete on Ada, then
+    quickly click delete on Grace: Ada's call is no longer aborted, it keeps running in the
+    background and finishes successfully server-side, but its <code>onSuccess</code> never fires
+    because it was superseded before it settled, so Ada stays in the list below even though the
+    server already deleted her. Only Grace's outcome (an error) reaches
+    <code>deleteUser.status</code>/<code>error</code>. Watch the activity log to see both calls
+    run to completion.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>
+
+<section class="log">
+  <h2>Activity log</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    }
+  </ol>
+</section>

@@ -1,0 +1,79 @@
+<p class="pitch">
+  Same page, same behaviour, but <code>createUser</code>/<code>deleteUser</code> are hand-rolled:
+  status/value/error signals, a generation counter, an <code>AbortController</code>,
+  <code>PendingTasks</code> and <code>DestroyRef</code> wiring, all written out twice. Compare
+  with the <a routerLink="/">mutation() version</a>, or see
+  <a routerLink="/detailed">every call logged step by step</a>.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUserIsPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUserIsPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    "Grace Hopper" always fails to delete (deterministic error demo). Deleting two different
+    users quickly races two hand-rolled calls against the same generation counter, see the
+    dedicated <a routerLink="/concurrent-deletion">concurrent deletion</a> page (the
+    <code>mutation()</code> version) for a step-by-step walkthrough.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); createUser(newName())">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUserIsPending()">
+      {{ createUserIsPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="resetCreateUser()">Reset</button>
+  </form>
+</section>
+
+<section class="state">
+  <h2>createUser: hand-rolled state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUserStatus() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ createUserIsPending() }}</dd>
+    <dt>value</dt>
+    <dd>{{ createUserValue() | json }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUserError() }}</dd>
+  </dl>
+  <p class="hint">
+    Create a user successfully, then submit an empty name: status flips to "error" but
+    "value" above still holds the last successfully created user so a failed mutation never
+    clears a previous success.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: hand-rolled state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUserStatus() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUserIsPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUserError() }}</dd>
+  </dl>
+  <button type="button" (click)="resetDeleteUser()">Reset</button>
+</section>

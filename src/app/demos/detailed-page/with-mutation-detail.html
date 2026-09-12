@@ -1,0 +1,99 @@
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    "Grace Hopper" always fails to delete (deterministic error demo). Click delete on two
+    different users quickly: the first call is no longer aborted, watch the activity log show it
+    running all the way to "request finished" in the background, even though it never gets a
+    "succeeded"/"failed" line since it was superseded before that.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending() && creatingFormId() === 'A'">
+      {{ createUser.isPending() && creatingFormId() === 'A' ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+
+  <h3>Create user (form B)</h3>
+  <form (submit)="$event.preventDefault(); submitB()">
+    <input
+      type="text"
+      [value]="newNameB()"
+      (input)="newNameB.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending() && creatingFormId() === 'B'">
+      {{ createUser.isPending() && creatingFormId() === 'B' ? 'Creating…' : 'Create user' }}
+    </button>
+  </form>
+  <p class="hint">
+    Both forms drive the same <code>createUser</code> mutation. Submit form A, then quickly submit
+    form B before the 2s delay elapses: form A's call keeps running to completion in the
+    background (see the activity log), but its result is superseded and never reaches
+    <code>onSuccess</code>. Same guard used for delete above.
+  </p>
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ createUser.isPending() }}</dd>
+    <dt>value</dt>
+    <dd>{{ createUser.value() | json }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUser.error() }}</dd>
+  </dl>
+  <p class="hint">
+    Create a user successfully, then submit an empty name: status flips to "error" but
+    "value" above still holds the last successfully created user. A failed mutation never
+    clears a previous success.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>
+
+<section class="log">
+  <h2>Activity log</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    }
+  </ol>
+</section>

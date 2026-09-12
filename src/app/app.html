@@ -1,0 +1,30 @@
+<div class="layout">
+  <aside class="sidebar">
+    <h1>@ngsignal/mutation <span class="badge">next: v0.3</span></h1>
+
+    <nav>
+      <div class="nav-group">
+        <h2>Released (v0.2.0)</h2>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Callbacks
+        </a>
+        <a routerLink="/no-callbacks" routerLinkActive="active">No callbacks</a>
+        <a routerLink="/concurrent-deletion" routerLinkActive="active">Concurrent deletion</a>
+        <a routerLink="/manual" routerLinkActive="active">Hand-rolled</a>
+        <a routerLink="/resource" routerLinkActive="active">Working with resource</a>
+        <a routerLink="/detailed" routerLinkActive="active">Detailed activity log</a>
+        <a routerLink="/http" routerLinkActive="active">httpMutation()</a>
+      </div>
+
+      <div class="nav-group">
+        <h2>What's next ?</h2>
+        <a routerLink="/has-value" routerLinkActive="active">hasValue() guard</a>
+        <a routerLink="/snapshot" routerLinkActive="active">snapshot()</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main>
+    <router-outlet />
+  </main>
+</div>

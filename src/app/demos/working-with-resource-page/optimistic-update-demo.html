@@ -1,0 +1,45 @@
+<p class="hint">
+  Deleting a user updates <code>usersResource.value()</code> immediately, before the (fake)
+  server even responds, then rolls back to the previous list in
+  <code>deleteUser.mutate(user).catch(...)</code> if the request fails. No
+  <code>onSuccess</code>/<code>onError</code> here: the resource is written to directly at the
+  call site.
+</p>
+
+@if (usersResource.isLoading() && !usersResource.hasValue()) {
+  <p>Loading users…</p>
+}
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of usersResource.value(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    Deleting "Grace Hopper" always fails: watch her disappear instantly, then reappear once the
+    rollback runs a couple seconds later.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUser.error() }}</dd>
+  </dl>
+</section>

@@ -1,0 +1,86 @@
+<p class="pitch">
+  <code>createUser</code> is built with <code>httpMutation()</code> and a real <code>HttpClient.post()</code> call instead of a
+  Promise-returning fake API. A fake <code>HttpInterceptorFn</code> (<code>fake-http-backend.ts</code>)
+  stands in for a real server, so the <code>Observable</code>-to-<code>Promise</code> bridging
+  and cancellation-on-destroy are exercised for real.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section>
+  <h2>Last created user card</h2>
+  @if (createUser.hasValue()) {
+    <div class="card">
+      <strong>{{ createUser.value().name }}</strong>
+      <span>#{{ createUser.value().id }}</span>
+    </div>
+  } @else {
+    <p class="hint">No user created yet, this card only renders once hasValue() is true.</p>
+  }
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUser.status() }}</dd>
+    <dt>isIdle / isPending / isSuccess / isError</dt>
+    <dd>
+      {{ createUser.isIdle() }} / {{ createUser.isPending() }} / {{ createUser.isSuccess() }} /
+      {{ createUser.isError() }}
+    </dd>
+    <dt>lastCreatedName</dt>
+    <dd>{{ lastCreatedName() ?? ':' }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUser.error()?.message }}</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Create user with progress (<code>reportProgress: true</code>)</h2>
+  <p class="hint">
+    <code>createUserWithProgress</code> is the same feature again, but <code>request()</code>
+    returns <code>Observable&lt;HttpEvent&lt;User&gt;&gt;</code> instead of
+    <code>Observable&lt;User&gt;</code>. The fake backend emits a few
+    <code>UploadProgress</code> events before the final response, feeding the
+    <code>progress</code> signal below.
+  </p>
+  <form (submit)="$event.preventDefault(); submitWithProgress()">
+    <input
+      type="text"
+      [value]="newNameForUpload()"
+      (input)="newNameForUpload.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUserWithProgress.isPending()">
+      {{ createUserWithProgress.isPending() ? 'Uploading…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUserWithProgress.reset()">Reset</button>
+  </form>
+
+  @if (createUserWithProgress.progress(); as p) {
+    <progress [value]="p.loaded" [max]="p.total ?? 100"></progress>
+    <span>{{ p.total ? ((p.loaded / p.total) * 100 | number: '1.0-0') : p.loaded }}%</span>
+  }
+
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUserWithProgress.status() }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUserWithProgress.error()?.message }}</dd>
+  </dl>
+</section>

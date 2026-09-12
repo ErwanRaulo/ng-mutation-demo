@@ -1,0 +1,80 @@
+<p class="pitch">
+  Same feature again, but neither <code>createUser</code> nor <code>deleteUser</code> is given an
+  <code>onSuccess</code>/<code>onError</code>: each call site does <code>await mutate()</code> and
+  updates state or catches the error right there instead. Compare with the
+  <a routerLink="/">callbacks version</a>.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    "Grace Hopper" always fails to delete (deterministic error demo). Click delete on two
+    different users quickly: the first call is no longer aborted, it keeps running and still
+    removes its own user from the list once it resolves, see the code comment in
+    <code>deleteUserClick</code>, or the dedicated
+    <a routerLink="/concurrent-deletion">concurrent deletion</a> page for the
+    <code>onSuccess</code>/<code>onError</code> version of the same race.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+  <p class="hint">
+    <code>submit()</code> awaits <code>createUser.mutate(...)</code> directly and applies the
+    result unconditionally: <code>mutate()</code> always resolves with the real value, superseded
+    or not, so there's no guard to write here or in <code>deleteUserClick</code> below anymore.
+  </p>
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ createUser.isPending() }}</dd>
+    <dt>value</dt>
+    <dd>{{ createUser.value() | json }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUser.error() }}</dd>
+  </dl>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>
