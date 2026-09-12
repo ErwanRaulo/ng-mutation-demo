@@ -1,0 +1,40 @@
+<p class="pitch">
+  <code>mutation&lt;TInput, TOutput, TError&gt;</code> — the third type argument types
+  <code>error()</code> and <code>onError</code>'s parameter as <code>TError</code> instead of
+  <code>unknown</code>. Here it's <code>ValidationError</code>, a small custom error class with
+  its own <code>field</code> property.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section class="state">
+  <h2>createUser.error(): ValidationError | undefined</h2>
+  @if (createUser.error(); as error) {
+    <dl>
+      <dt>error.message</dt>
+      <dd class="error-text">{{ error.message }}</dd>
+      <dt>error.field</dt>
+      <dd class="error-text">{{ error.field }}</dd>
+    </dl>
+    <p class="hint">
+      No <code>as ValidationError</code> cast: <code>error.field</code> compiles because of the
+      <code>mutation&lt;string, User, ValidationError&gt;</code> annotation above.
+    </p>
+  } @else {
+    <p class="hint">No error yet — submit an empty name to trigger one.</p>
+  }
+</section>

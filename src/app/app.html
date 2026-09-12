@@ -1,0 +1,35 @@
+<div class="layout">
+  <aside class="sidebar">
+    <p class="brand">@ngsignal/mutation<span class="version">v0.6.2</span></p>
+
+    <nav>
+      <div class="nav-group">
+        <h2>Released (v0.6.2)</h2>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Callbacks
+        </a>
+        <a routerLink="/no-callbacks" routerLinkActive="active">No callbacks</a>
+        <a routerLink="/concurrent-deletion" routerLinkActive="active">Concurrent deletion</a>
+        <a routerLink="/manual" routerLinkActive="active">Hand-rolled</a>
+        <a routerLink="/resource" routerLinkActive="active">Working with resource</a>
+        <a routerLink="/detailed" routerLinkActive="active">Detailed activity log</a>
+        <a routerLink="/has-value" routerLinkActive="active">hasValue() guard</a>
+        <a routerLink="/snapshot" routerLinkActive="active">snapshot()</a>
+        <a routerLink="/concurrency-queue" routerLinkActive="active">concurrency: 'queue'</a>
+        <a routerLink="/concurrency-drop" routerLinkActive="active">concurrency: 'drop'</a>
+        <a routerLink="/on-settled" routerLinkActive="active">onSettled()</a>
+        <a routerLink="/input" routerLinkActive="active">input()</a>
+        <a routerLink="/status-flags" routerLinkActive="active">isIdle / isSuccess / isError</a>
+        <a routerLink="/typed-errors" routerLinkActive="active">Typed errors</a>
+        <a routerLink="/rx" routerLinkActive="active">rxMutation()</a>
+        <a routerLink="/http" routerLinkActive="active">httpMutation()</a>
+        <a routerLink="/http-responses" routerLinkActive="active">httpMutation(): response body</a>
+      </div>
+    </nav>
+  </aside>
+
+  <main>
+    <h1 class="page-title">{{ pageTitle() }}</h1>
+    <router-outlet />
+  </main>
+</div>

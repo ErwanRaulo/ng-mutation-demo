@@ -1,0 +1,27 @@
+<p class="pitch">
+  <code>mutation()</code> has no cache and won't touch a <code>resource()</code>/
+  <code>httpResource()</code> for you — two recipes below bridge them.
+</p>
+
+<div class="subnav">
+  <button
+    type="button"
+    [class.active]="recipe() === 'refresh'"
+    (click)="recipe.set('refresh')"
+  >
+    Refresh after mutation
+  </button>
+  <button
+    type="button"
+    [class.active]="recipe() === 'optimistic'"
+    (click)="recipe.set('optimistic')"
+  >
+    Optimistic update
+  </button>
+</div>
+
+@if (recipe() === 'refresh') {
+  <app-refresh-resource-demo />
+} @else {
+  <app-optimistic-update-demo />
+}

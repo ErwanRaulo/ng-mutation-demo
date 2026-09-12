@@ -1,0 +1,79 @@
+<p class="pitch">
+  Two independent <code>mutation()</code> instances move the same items around, side by side —
+  one with no <code>concurrency</code> option, one with <code>concurrency: 'queue'</code>.
+  "Charlie" is artificially slower than the others (a demo-only trick, not something
+  <code>mutation()</code> does), so clicking Charlie then quickly clicking Alpha reliably races
+  two requests.
+</p>
+
+<section>
+  <h2>Move an item to the top</h2>
+  <ul>
+    @for (item of items; track item) {
+      <li>
+        {{ item }}
+        <button type="button" (click)="moveToTop(item)">Move to top</button>
+      </li>
+    }
+  </ul>
+  <button type="button" (click)="reset()">Reset</button>
+  <p class="hint">
+    Try it: click "Charlie", then immediately click "Alpha". Alpha was the <em>last</em> thing you
+    clicked — both columns below should end up showing Alpha first.
+  </p>
+</section>
+
+<section class="state">
+  <h2>No concurrency option</h2>
+  <dl>
+    <dt>mutation.value() — what the client believes</dt>
+    <dd>
+      @if (moveNoQueue.hasValue()) {
+        [{{ moveNoQueue.value().join(', ') }}]
+      } @else {
+        not moved yet
+      }
+    </dd>
+    <dt>server order (ground truth)</dt>
+    <dd>[{{ noQueueServerOrder().join(', ') }}]</dd>
+  </dl>
+  <p class="hint">
+    Both requests fire immediately. Alpha's (fast) finishes first and updates the server, then
+    Charlie's (slow) finishes later and <strong>overwrites it</strong> — the server ends up
+    reflecting Charlie, the request you submitted <em>first</em>, not Alpha. The client's own
+    belief doesn't even match that: it's stuck showing Alpha's own response, from before Charlie's
+    late-arriving overwrite.
+  </p>
+</section>
+
+<section class="state">
+  <h2>concurrency: 'queue'</h2>
+  <dl>
+    <dt>mutation.value() — what the client believes</dt>
+    <dd>
+      @if (moveQueued.hasValue()) {
+        [{{ moveQueued.value().join(', ') }}]
+      } @else {
+        not moved yet
+      }
+    </dd>
+    <dt>server order (ground truth)</dt>
+    <dd>[{{ queueServerOrder().join(', ') }}]</dd>
+  </dl>
+  <p class="hint">
+    Alpha's request doesn't start until Charlie's has fully finished. It runs on top of Charlie's
+    already-applied move, so the server ends up reflecting Alpha — the request you submitted
+    <em>last</em> — and the client's belief matches it exactly.
+  </p>
+</section>
+
+<section class="log">
+  <h2>Activity log</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    } @empty {
+      <li class="hint">Nothing yet — try the race above.</li>
+    }
+  </ol>
+</section>

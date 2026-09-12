@@ -1,0 +1,53 @@
+<p class="hint">
+  <code>onSuccess</code> just calls <code>usersResource.reload()</code> — the (fake) server stays
+  the source of truth, no manual list splicing.
+</p>
+
+@if (usersResource.isLoading() && !usersResource.hasValue()) {
+  <p>Loading users…</p>
+}
+
+@if (usersResource.error(); as error) {
+  <p class="hint error-text">Failed to load users: {{ error }}</p>
+}
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of usersResource.value(); track user.id) {
+      <li>{{ user.name }}</li>
+    }
+  </ul>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+  </form>
+  <p class="hint">The new user appears once <code>reload()</code> re-fetches the list.</p>
+</section>
+
+<section class="state">
+  <h2>usersResource: full state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="usersResource.status()">{{
+        usersResource.status()
+      }}</span>
+    </dd>
+    <dt>isLoading</dt>
+    <dd>{{ usersResource.isLoading() }}</dd>
+    <dt>value</dt>
+    <dd> <code>{{ usersResource.value() | json }}</code></dd>
+  </dl>
+</section>

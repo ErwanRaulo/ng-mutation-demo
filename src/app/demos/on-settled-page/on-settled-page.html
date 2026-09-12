@@ -1,0 +1,39 @@
+<p class="pitch">
+  <code>onSettled</code> runs once <code>onSuccess</code> or <code>onError</code> has fired,
+  with <code>(output, error, input)</code>. It's the one place to put cleanup that must happen
+  either way, instead of duplicating it in both callbacks.
+</p>
+
+<section>
+  <h2>Quick add panel</h2>
+  @if (!isPanelOpen()) {
+    <button type="button" (click)="openPanel()">Add user</button>
+  } @else {
+    <form (submit)="$event.preventDefault(); submit()">
+      <input
+        type="text"
+        [value]="newName()"
+        (input)="newName.set($any($event.target).value)"
+        placeholder="New user name (empty = deterministic error)"
+      />
+      <button type="submit" [disabled]="createUser.isPending()">
+        {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+      </button>
+    </form>
+    <p class="hint">
+      The panel only closes from <code>onSettled</code>. Submit an empty name: the mutation
+      fails, <code>onError</code> runs, then <code>onSettled</code> still closes the panel.
+    </p>
+  }
+</section>
+
+<section class="state">
+  <h2>Callback order</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    } @empty {
+      <li class="hint">Nothing yet — open the panel and submit.</li>
+    }
+  </ol>
+</section>

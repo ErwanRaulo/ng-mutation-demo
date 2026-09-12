@@ -1,0 +1,46 @@
+<p class="pitch">
+  <code>input()</code> holds the input of the most recent <code>mutate()</code> call, from the
+  moment it's called until the next <code>mutate()</code> or <code>reset()</code>. No need for
+  the caller to store it separately to know what was being submitted.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section class="state">
+  <h2>createUser.input()</h2>
+  @switch (createUser.status()) {
+    @case ('pending') {
+      <p class="hint">Creating "{{ createUser.input() }}"…</p>
+    }
+    @case ('error') {
+      <p class="hint">
+        Failed to create "{{ createUser.input() }}" —
+        <button type="button" (click)="retry()">retry?</button>
+      </p>
+    }
+    @case ('idle') {
+      <p class="hint">Nothing submitted yet, <code>input()</code> is undefined.</p>
+    }
+    @case ('success') {
+      <p class="hint">Last submitted input was "{{ createUser.input() }}".</p>
+    }
+  }
+  <p class="hint">
+    <code>retry()</code> reads <code>createUser.input()</code> directly — the component never
+    stored the failed name on its own.
+  </p>
+</section>

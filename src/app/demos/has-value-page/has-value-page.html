@@ -1,0 +1,52 @@
+<p class="pitch">
+  <code>createUser.value()</code> is <code>User | undefined</code> until the first success.
+  <code>hasValue()</code> is a type-guard: once true, TypeScript narrows <code>value()</code> to
+  <code>User</code>.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section>
+  <h2>Last created user card</h2>
+  @if (createUser.hasValue()) {
+    <div class="card">
+      <strong>{{ createUser.value().name }}</strong>
+      <span>#{{ createUser.value().id }}</span>
+    </div>
+  } @else {
+    <p class="hint">No user created yet, this card only renders once hasValue() is true.</p>
+  }
+  <p class="hint">
+    Inside the <code>&#64;if</code> block, <code>hasValue()</code> narrows <code>value()</code>
+    to <code>User</code>. Submit an empty name to trigger an error: the card keeps showing the
+    last success, it never disappears.
+  </p>
+</section>
+
+<section class="state">
+  <h2>lastCreatedName</h2>
+  <dl>
+    <dt>last created name</dt>
+    <dd>{{ lastCreatedName() ?? '—' }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="createUser.error()">{{ createUser.error() }}</dd>
+  </dl>
+  <p class="hint">
+    No <code>?.</code>, <code>!</code>, or <code>undefined</code> check needed —
+    <code>hasValue()</code> already narrowed it.
+  </p>
+</section>
