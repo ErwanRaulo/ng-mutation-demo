@@ -1,0 +1,69 @@
+<p class="pitch">
+  Two independent <code>mutation()</code> instances charge a card, side by side — one with no
+  <code>concurrency</code> option, one with <code>concurrency: 'drop'</code>. The fake server
+  takes 1.5 seconds to answer (an artificial delay, to leave time for a second click).
+</p>
+
+<section>
+  <h2>Pay</h2>
+  <button type="button" (click)="pay()">Pay {{ amount }} €</button>
+  <button type="button" (click)="reset()">Reset</button>
+  <p class="hint">
+    Try it: double-click "Pay". The button is deliberately <em>not</em> disabled while pending, to
+    show what each mutation does with a second click on its own.
+  </p>
+</section>
+
+<section class="state">
+  <h2>No concurrency option</h2>
+  <dl>
+    <dt>mutation.status()</dt>
+    <dd>{{ payNoDrop.status() }}</dd>
+    <dt>mutation.value() — charges recorded by the server</dt>
+    <dd>
+      @if (payNoDrop.hasValue()) {
+        {{ payNoDrop.value().length }} charge(s) of {{ amount }} €
+      } @else {
+        no charge yet
+      }
+    </dd>
+  </dl>
+  <p class="hint">
+    Each click starts its own request, and both reach the server: a double-click charges the card
+    <strong>twice</strong>.
+  </p>
+</section>
+
+<section class="state">
+  <h2>concurrency: 'drop'</h2>
+  <dl>
+    <dt>mutation.status()</dt>
+    <dd>{{ payDrop.status() }}</dd>
+    <dt>mutation.value() — charges recorded by the server</dt>
+    <dd>
+      @if (payDrop.hasValue()) {
+        {{ payDrop.value().length }} charge(s) of {{ amount }} €
+      } @else {
+        no charge yet
+      }
+    </dd>
+  </dl>
+  <p class="hint">
+    While a charge is in flight, the second click is dropped: <code>mutationFn</code> is not
+    called and the signals are left untouched, and that <code>mutate()</code> rejects with an
+    <code>AbortError</code> whose message is <code>'Dropped'</code>. The card is charged
+    <strong>once</strong>. A new click is accepted as soon as the charge settles (or after
+    <code>reset()</code>).
+  </p>
+</section>
+
+<section class="log">
+  <h2>Activity log</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    } @empty {
+      <li class="hint">Nothing yet — try a double-click above.</li>
+    }
+  </ol>
+</section>

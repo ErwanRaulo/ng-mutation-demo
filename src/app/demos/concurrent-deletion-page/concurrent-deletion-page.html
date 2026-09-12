@@ -1,0 +1,55 @@
+<p class="pitch">
+  Calling <code>mutate()</code> again while one is in flight does <strong>not</strong> abort it —
+  both run to completion, but only the latest call's outcome reaches
+  <code>status</code>/<code>error</code>/<code>onSuccess</code>/<code>onError</code>.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          class="danger"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    Deleting "Grace Hopper" always fails. Click delete on Ada, then quickly on Grace: both
+    requests run to completion, and Ada does disappear from the list — this page removes her
+    via her own <code>mutate()</code> promise, not <code>onSuccess</code>.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="deleteUser.status()">{{
+        deleteUser.status()
+      }}</span>
+    </dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="deleteUser.error()">{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>
+
+<section class="log">
+  <h2>Activity log</h2>
+  <ol>
+    @for (entry of log(); track $index) {
+      <li>{{ entry }}</li>
+    }
+  </ol>
+</section>

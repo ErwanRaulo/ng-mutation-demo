@@ -1,0 +1,70 @@
+<p class="pitch">
+  <code>isIdle</code>/<code>isSuccess</code>/<code>isError</code> are derived straight from
+  <code>status()</code> — sugar for <code>status() === 'success'</code> and friends, so templates
+  read as booleans instead of string comparisons. Compare with <code>isPending</code>, which
+  already existed.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section>
+  <h2>Rendered from the flags directly</h2>
+  @if (createUser.isIdle()) {
+    <p class="hint">Idle — nothing created yet.</p>
+  }
+  @if (createUser.isPending()) {
+    <p class="hint">Pending…</p>
+  }
+  @if (createUser.isError()) {
+    <p class="hint error-text">{{ createUser.error() }}</p>
+  }
+  @if (createUser.hasValue()) {
+    <div class="card">
+      <strong>{{ createUser.value().name }}</strong>
+      <span>#{{ createUser.value().id }}</span>
+    </div>
+  }
+  <p class="hint">
+    <code>isSuccess()</code> itself doesn't narrow <code>value()</code> — that's what
+    <code>hasValue()</code> is for, see the card above. The two are complementary: one tells you
+    the status, the other narrows the type.
+  </p>
+</section>
+
+<section class="state">
+  <h2>status() vs. the flags</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="createUser.status()">{{
+        createUser.status()
+      }}</span>
+    </dd>
+    <dt>isIdle</dt>
+    <dd>{{ createUser.isIdle() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ createUser.isPending() }}</dd>
+    <dt>isSuccess</dt>
+    <dd>{{ createUser.isSuccess() }}</dd>
+    <dt>isError</dt>
+    <dd>{{ createUser.isError() }}</dd>
+  </dl>
+  <p class="hint">
+    Exactly one of the four flags is true at any time — they don't add new state, just a
+    friendlier read of <code>status()</code>.
+  </p>
+</section>

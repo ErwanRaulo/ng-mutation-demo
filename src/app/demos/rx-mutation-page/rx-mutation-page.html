@@ -1,0 +1,49 @@
+<p class="pitch">
+  <code>rxMutation()</code> is the mutation counterpart of <code>rxResource()</code>: its
+  <code>mutationFn</code> returns any <code>Observable</code>, typically an existing
+  service method such as <code>this.http.post()</code>. The first emitted value resolves the
+  call; <code>reset()</code> or destroying the component unsubscribes. Unlike
+  <code>httpMutation()</code>, it doesn't see the HTTP events, so there is no
+  <code>progress</code>, <code>statusCode</code> or <code>headers</code>. The fake backend adds
+  an artificial 2&nbsp;s delay.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      aria-label="New user name"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic 422 error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+  <p class="hint">Click Reset while a call is pending: the request is unsubscribed and the state goes back to idle.</p>
+</section>
+
+<section class="state">
+  <h2>createUser: state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="createUser.status()">{{
+        createUser.status()
+      }}</span>
+    </dd>
+    <dt>value</dt>
+    <dd>
+      @if (createUser.hasValue()) {
+        {{ createUser.value().name }} (#{{ createUser.value().id }})
+      } @else {
+        —
+      }
+    </dd>
+    <dt>error</dt>
+    <dd [class.error-text]="createUser.error()">{{ createUser.error()?.message }}</dd>
+  </dl>
+</section>

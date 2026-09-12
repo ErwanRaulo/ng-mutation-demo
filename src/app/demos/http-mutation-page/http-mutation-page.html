@@ -1,0 +1,120 @@
+<p class="pitch">
+  <code>httpMutation()</code> is the mutation counterpart of <code>httpResource()</code>:
+  <code>request</code> returns a request <em>description</em>
+  (<code>{{ '{' }} method, url, body {{ '}' }}</code>) and the library sends it through
+  <code>HttpClient</code> itself. That's why it can also expose <code>statusCode</code>,
+  <code>headers</code> and <code>progress</code>. A fake <code>HttpInterceptorFn</code>
+  (<code>fake-http-backend.ts</code>) stands in for the server, with an artificial 2&nbsp;s delay.
+</p>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      aria-label="New user name"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic 422 error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+</section>
+
+<section>
+  <h2>Last created user card</h2>
+  @if (createUser.hasValue()) {
+    <div class="card">
+      <strong>{{ createUser.value().name }}</strong>
+      <span>#{{ createUser.value().id }}</span>
+    </div>
+  } @else {
+    <p class="hint">No user created yet, this card only renders once hasValue() is true.</p>
+  }
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="createUser.status()">{{
+        createUser.status()
+      }}</span>
+    </dd>
+    <dt>statusCode</dt>
+    <dd>{{ createUser.statusCode() ?? '—' }}</dd>
+    <dt>headers.get('Location')</dt>
+    <dd>{{ createUser.headers()?.get('Location') ?? '—' }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="createUser.error()">{{ createUser.error()?.message }}</dd>
+  </dl>
+  <p class="hint">
+    <code>statusCode</code> and <code>headers</code> are cleared when a new
+    <code>mutate()</code> starts, and filled from either the <code>HttpResponse</code> or the
+    <code>HttpErrorResponse</code>. Submit an empty name to see the 422.
+  </p>
+  <div class="flags">
+    <div>
+      <span class="flags-label">isIdle</span>
+      <span class="flags-value">{{ createUser.isIdle() }}</span>
+    </div>
+    <div>
+      <span class="flags-label">isPending</span>
+      <span class="flags-value">{{ createUser.isPending() }}</span>
+    </div>
+    <div>
+      <span class="flags-label">isSuccess</span>
+      <span class="flags-value">{{ createUser.isSuccess() }}</span>
+    </div>
+    <div>
+      <span class="flags-label">isError</span>
+      <span class="flags-value">{{ createUser.isError() }}</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Create user with progress (<code>reportProgress: true</code>)</h2>
+  <p class="hint">
+    Same feature, with <code>reportProgress: true</code> added to the request description. The
+    fake backend emits <code>UploadProgress</code> events (artificial 400&nbsp;ms each) that
+    feed the <code>progress</code> signal below.
+  </p>
+  <form (submit)="$event.preventDefault(); submitWithProgress()">
+    <input
+      type="text"
+      aria-label="New user name (with progress)"
+      [value]="newNameForUpload()"
+      (input)="newNameForUpload.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic 422 error)"
+    />
+    <button type="submit" [disabled]="createUserWithProgress.isPending()">
+      {{ createUserWithProgress.isPending() ? 'Uploading…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUserWithProgress.reset()">Reset</button>
+  </form>
+
+  @if (createUserWithProgress.progress(); as p) {
+    <progress [value]="p.loaded" [max]="p.total ?? 100" aria-label="Upload progress"></progress>
+    <span>{{ p.total ? ((p.loaded / p.total) * 100 | number: '1.0-0') : p.loaded }}%</span>
+  }
+
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="createUserWithProgress.status()">{{
+        createUserWithProgress.status()
+      }}</span>
+    </dd>
+    <dt>statusCode</dt>
+    <dd>{{ createUserWithProgress.statusCode() ?? '—' }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="createUserWithProgress.error()">
+      {{ createUserWithProgress.error()?.message }}
+    </dd>
+  </dl>
+</section>

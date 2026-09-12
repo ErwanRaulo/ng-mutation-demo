@@ -1,0 +1,85 @@
+<p class="pitch">
+  Same feature, no <code>onSuccess</code>/<code>onError</code>: each call site does
+  <code>await mutate()</code> and handles the result directly. Compare with the
+  <a routerLink="/">callbacks version</a>.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          class="danger"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    Deleting "Grace Hopper" always fails. Delete two users quickly: the first call isn't
+    aborted, it still removes its user once it resolves — see the comment in
+    <code>deleteUserClick</code>, or <a routerLink="/concurrent-deletion">concurrent deletion</a>
+    for the callbacks version.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+  <p class="hint">
+    <code>submit()</code> just awaits <code>mutate()</code> and applies the result — no guard
+    needed, <code>mutate()</code> always resolves with the real value.
+  </p>
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="createUser.status()">{{
+        createUser.status()
+      }}</span>
+    </dd>
+    <dt>isPending</dt>
+    <dd>{{ createUser.isPending() }}</dd>
+    <dt>value</dt>
+    <dd>{{ createUser.value() | json }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="createUser.error()">{{ createUser.error() }}</dd>
+  </dl>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>
+      <span class="status-pill" [attr.data-status]="deleteUser.status()">{{
+        deleteUser.status()
+      }}</span>
+    </dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd [class.error-text]="deleteUser.error()">{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>
