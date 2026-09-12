@@ -1,0 +1,14 @@
+<main>
+  <h1>@ngsignal/mutation demo</h1>
+
+  <nav>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      With mutation()
+    </a>
+    <a routerLink="/manual" routerLinkActive="active">Without mutation() (hand-rolled)</a>
+    <a routerLink="/detailed" routerLinkActive="active">Detailed (with logs)</a>
+    <a routerLink="/resource" routerLinkActive="active">With resource()</a>
+  </nav>
+
+  <router-outlet />
+</main>

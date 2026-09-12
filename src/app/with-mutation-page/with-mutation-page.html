@@ -1,0 +1,94 @@
+<p class="pitch">
+  Both <code>createUser</code> and <code>deleteUser</code> are built with a single call to
+  <code>mutation()</code> each. Compare with the
+  <a routerLink="/manual">hand-rolled version</a>, or see
+  <a routerLink="/detailed">every call logged step by step</a>.
+</p>
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of users(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    "Grace Hopper" always fails to delete (deterministic error demo). Click delete on two
+    different users quickly: the first call is aborted and superseded by the second.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending() && creatingFormId() === 'A'">
+      {{ createUser.isPending() && creatingFormId() === 'A' ? 'Creating…' : 'Create user' }}
+    </button>
+    <button type="button" (click)="createUser.reset()">Reset</button>
+  </form>
+
+  <h3>Create user (form B)</h3>
+  <form (submit)="$event.preventDefault(); submitB()">
+    <input
+      type="text"
+      [value]="newNameB()"
+      (input)="newNameB.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending() && creatingFormId() === 'B'">
+      {{ createUser.isPending() && creatingFormId() === 'B' ? 'Creating…' : 'Create user' }}
+    </button>
+  </form>
+  <p class="hint">
+    Both forms drive the same <code>createUser</code> mutation. Submit form A, then quickly submit
+    form B before the 2s delay elapses: form A's button stops showing "Creating…" because its
+    call was superseded. Same race-condition guard used for delete above.
+  </p>
+</section>
+
+<section class="state">
+  <h2>createUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ createUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ createUser.isPending() }}</dd>
+    <dt>value</dt>
+    <dd>{{ createUser.value() | json }}</dd>
+    <dt>error</dt>
+    <dd>{{ createUser.error() }}</dd>
+  </dl>
+  <p class="hint">
+    Create a user successfully, then submit an empty name: status flips to "error" but
+    "value" above still holds the last successfully created user. A failed mutation never
+    clears a previous success.
+  </p>
+</section>
+
+<section class="state">
+  <h2>deleteUser: full API state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ deleteUser.status() }}</dd>
+    <dt>isPending</dt>
+    <dd>{{ deleteUser.isPending() }}</dd>
+    <dt>error</dt>
+    <dd>{{ deleteUser.error() }}</dd>
+  </dl>
+  <button type="button" (click)="deleteUser.reset()">Reset</button>
+</section>

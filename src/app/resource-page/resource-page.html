@@ -1,0 +1,67 @@
+<p class="pitch">
+  Same feature again, but the user list is a <code>resource()</code> instead of a plain
+  <code>signal()</code>: <code>createUser</code> refreshes it via <code>reload()</code> on
+  success, <code>deleteUser</code> updates it optimistically and rolls back on error, the two
+  patterns from the <code>@ngsignal/mutation</code> README's "Working with resource()" section.
+  Compare with <a routerLink="/">the plain-signal version</a>.
+</p>
+
+@if (usersResource.isLoading() && !usersResource.hasValue()) {
+  <p>Loading users…</p>
+}
+
+@if (usersResource.error(); as error) {
+  <p class="hint">Failed to load users: {{ error }}</p>
+}
+
+<section>
+  <h2>Users</h2>
+  <ul>
+    @for (user of usersResource.value(); track user.id) {
+      <li>
+        {{ user.name }}
+        <button
+          type="button"
+          (click)="deleteUserClick(user)"
+          [disabled]="deleteUser.isPending() && deletingUserId() === user.id"
+        >
+          {{ deleteUser.isPending() && deletingUserId() === user.id ? 'Deleting…' : 'Delete' }}
+        </button>
+      </li>
+    }
+  </ul>
+  <p class="hint">
+    Deleting "Grace Hopper" always fails: she reappears in the list once the rollback runs.
+  </p>
+</section>
+
+<section>
+  <h2>Create user</h2>
+  <form (submit)="$event.preventDefault(); submit()">
+    <input
+      type="text"
+      [value]="newName()"
+      (input)="newName.set($any($event.target).value)"
+      placeholder="New user name (empty = deterministic error)"
+    />
+    <button type="submit" [disabled]="createUser.isPending()">
+      {{ createUser.isPending() ? 'Creating…' : 'Create user' }}
+    </button>
+  </form>
+  <p class="hint">
+    On success, the new user only shows up once <code>usersResource.reload()</code> re-fetches
+    the list from the (fake) server. There's no manual list splicing here.
+  </p>
+</section>
+
+<section class="state">
+  <h2>usersResource: full state</h2>
+  <dl>
+    <dt>status</dt>
+    <dd>{{ usersResource.status() }}</dd>
+    <dt>isLoading</dt>
+    <dd>{{ usersResource.isLoading() }}</dd>
+    <dt>value</dt>
+    <dd>{{ usersResource.value() | json }}</dd>
+  </dl>
+</section>

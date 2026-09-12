@@ -1,0 +1,60 @@
+section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+ul,
+ol {
+  padding-left: 0;
+  list-style: none;
+}
+
+ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.hint {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.pitch {
+  color: #444;
+  font-size: 0.9rem;
+  background: #f6f6f6;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+}
+
+.pitch code {
+  font-family: ui-monospace, monospace;
+}
+
+.state dl {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+.state dt {
+  font-weight: 600;
+  color: #555;
+}
+
+.state dd {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+}
+
+.log ol {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
